@@ -1,3 +1,8 @@
+## 0.0.3
+
+* Fixed common issues related to wildcard identifier warnings in the `Navigator.pop()` method.
+* Improved example code for better clarity on usage.
+
 ## 0.0.2
 
 * Updated the example to include both GET and POST requests.

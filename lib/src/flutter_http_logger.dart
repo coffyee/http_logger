@@ -3,13 +3,23 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// A class for logging HTTP requests and responses in real-time.
+///
+/// The `HttpLog` class allows you to start a local server to view logs in a
+/// web browser. It supports sending logs for GET, POST, and POST_FILE requests.
 class HttpLog {
   static bool _isProd = false;
 
+  /// Stores the list of logs as a map.
   static final List<Map<String, dynamic>> _logs = [];
 
+  /// The IP address of the device.
   static String? ipAddress = "";
 
+  /// Retrieves the device's IP address for IPv4.
+  ///
+  /// This method is used internally to fetch the local IP address, which is used
+  /// to host the logging server.
   static Future<String?> _myIp() async {
     try {
       final interfaces = await NetworkInterface.list(
@@ -21,6 +31,7 @@ class HttpLog {
           .first
           .address;
     } catch (e) {
+      // Handle IP fetch error
       // print('192.. IP is not found $e');
     }
     return null;
@@ -28,6 +39,10 @@ class HttpLog {
 
   static late String? _ip;
 
+  /// Starts the HTTP logging server on the device.
+  ///
+  /// The [context] parameter is required to show a dialog with the local server URL.
+  /// If [isSandbox] is set to `true`, the server will run in sandbox mode.
   static void startServer(BuildContext context,
       {final bool isSandbox = true}) async {
     if (kDebugMode) return;
@@ -43,7 +58,7 @@ class HttpLog {
       final _url = "http://${server.address.address}:${server.port}/logs";
       showDialog(
           context: context,
-          builder: (_) {
+          builder: (BuildContext context) {
             return SimpleDialog(
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -80,7 +95,7 @@ class HttpLog {
                 ),
                 ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(_);
+                      Navigator.pop(context);
                     },
                     child: const Text("Close")),
               ],
@@ -102,9 +117,10 @@ class HttpLog {
         }
       }
     } catch (e) {
+      // Handle server error
       showDialog(
           context: context,
-          builder: (_) {
+          builder: (BuildContext context) {
             return SimpleDialog(
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -121,7 +137,7 @@ class HttpLog {
                 ),
                 ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(_);
+                      Navigator.pop(context);
                     },
                     child: const Text("Close")),
               ],
@@ -131,6 +147,11 @@ class HttpLog {
     }
   }
 
+  /// Logs HTTP request and response details.
+  ///
+  /// The [method] represents the HTTP method (GET, POST, etc.). The [url] is the
+  /// target URL for the request. Optionally, you can provide [header], [request]
+  /// payload, [statusCode], and [response].
   static void sendLog({
     required String method,
     required String url,
@@ -165,15 +186,16 @@ class HttpLog {
     _logs.add(log);
   }
 
+  /// Returns the logs in JSON format.
   static String get logsJson => jsonEncode(_logs);
 
+  /// Clears all stored logs.
   static bool get clearLogs {
     _logs.clear();
     return true;
   }
 
-// modified version of just above
-
+  /// Generates HTML content for the log display in the browser.
   static String _generateHtmlContent() {
     final buffer = StringBuffer();
     buffer.write('<html><head><title>HTTP Logger</title>');
