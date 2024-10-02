@@ -1,7 +1,7 @@
 
-# http_logger
+# flutter_http_logger
 
-`http_logger` is a simple Flutter package that enables logging of HTTP requests and responses. This package allows developers to view logs in a web browser using a provided URL. It is designed to create a local server from real devices (not emulators) to facilitate HTTP log viewing.
+`flutter_http_logger` is a simple Flutter package that enables logging of HTTP requests and responses. This package allows developers to view logs in a web browser using a provided URL. It is designed to create a local server from real devices (not emulators) to facilitate HTTP log viewing.
 
 ## Features
 
@@ -12,17 +12,17 @@
 
 ## Getting Started
 
-To start using `http_logger`, add it to your `pubspec.yaml` file:
+To start using `flutter_http_logger`, add it to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  http_logger: 0.0.1
+  flutter_http_logger: 0.0.1
 ```
 
 Then, import the package:
 
 ```dart
-import 'package:http_logger/http_logger.dart';
+import 'package:flutter_http_logger/flutter_http_logger.dart';
 ```
 
 ## Usage
@@ -83,10 +83,10 @@ After starting the server, visit the provided URL (displayed in the logs or your
 
 ## Example
 
-Here is a simple example of how to integrate `http_logger` with an HTTP client in a Flutter app:
+Here is a simple example of how to integrate `flutter_http_logger` with an HTTP client in a Flutter app:
 
 ```dart
-import 'package:http_logger/http_logger.dart';
+import 'package:flutter_http_logger/flutter_http_logger.dart';
 
 void main() {
   // Initialize the HTTP Logger
