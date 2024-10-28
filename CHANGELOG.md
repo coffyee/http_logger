@@ -1,4 +1,4 @@
-## 0.0.3
+## 0.0.4
 
 * Added response duration logging to track the time taken for each HTTP response.
 
