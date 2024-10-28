@@ -198,94 +198,118 @@ class HttpLog {
     buffer.write('<html><head><title>HTTP Logger</title>');
 
     buffer.write('''
-  <script type="text/javascript">
-      var logs = $logsJson; // Store logs data to manage view
-      var selectedLogIndex = null; // Track the currently selected log
+<script type="text/javascript">
+    var logs = $logsJson; // Store logs data to manage view
+    var selectedLogIndex = null; // Track the currently selected log
+    var isDragging = false; // Track dragging status for the resizer
+    var startX; // Starting mouse X position
+    var startLeftWidth; // Starting width of the left container
 
-      
-      function updateURLList() {
-          console.log('Updating URL list with logs:', logs); // Debugging line
-          var urlList = document.getElementById('urlList');
+    function updateURLList() {
+        console.log('Updating URL list with logs:', logs); // Debugging line
+        var urlList = document.getElementById('urlList');
 
-          // Update URL list
-          urlList.innerHTML = '';
-          logs.forEach(function(log, index) {
-              var listItem = document.createElement('li');
-              listItem.textContent = `\${log.method} | Status: \${log.status} | Duration: \${log.duration}ms \n: \${log.url}`;
-              listItem.onclick = function() {
-                  displayDetails(index);
-              };
+        urlList.innerHTML = '';
+        logs.forEach(function(log, index) {
+            var listItem = document.createElement('li');
+            listItem.textContent = `\${log.method} | Status: \${log.status} | Duration: \${log.duration}ms \n: \${log.url}`;
+            listItem.onclick = function() {
+                displayDetails(index);
+            };
 
-              // Change text color to red if status is not 200
-              if (log.status !== 200) {
-                  listItem.style.color = 'red';
-              }
+            if (log.status !== 200) {
+                listItem.style.color = 'red';
+            }
 
-              // Apply selected class if this is the selected log
-              if (index === selectedLogIndex) {
-                  listItem.classList.add('selected');
-              }
+            if (index === selectedLogIndex) {
+                listItem.classList.add('selected');
+            }
 
-              urlList.appendChild(listItem);
-          });
-      }
+            urlList.appendChild(listItem);
+        });
+    }
 
-      function displayDetails(index) {
-          var details = document.getElementById('details');
-          var log = logs[index];
+    function displayDetails(index) {
+        var details = document.getElementById('details');
+        var log = logs[index];
 
-          if (log && log.url) {
-              // Display selected log details
-              details.innerHTML = `
+        if (log && log.url) {
+            details.innerHTML = `
                 <h2>METHOD: \${log.method}</h2>
-                <h3>URL: \${log.url}</h3>
-                <h3>Header</h3>
+                 <h3>Header</h3>
                 <pre>\${JSON.stringify(log.header, null, 2)}</pre>
+                <h3>URL: \${log.url}</h3>
                 <h3 style=\${log.request == null ? "display:none" : ""}>Request</h3>
                 <pre style=\${log.request == null ? "display:none" : ""}>\${JSON.stringify(log.request, null, 2)}</pre>
                 <h3>Status: \${log.status}</h3>
                 <h3 style=\${log.duration == null ? "display:none" : ""}>Duration: \${log.duration}ms</h3>
                 <h3>Response</h3>
                 <pre style=\${log.response == null ? "display:none" : ""}>\${JSON.stringify(log.response, null, 2)}</pre>
-              `;
-              
-              // Update selected log index and UI
-              selectedLogIndex = index;
-              updateURLList(); // Update URL list to highlight the selected log
-          } else {
-              details.innerHTML = '<p>Error: Log details not available.</p>';
-          }
-      }
+            `;
 
-      window.onload = function() {
-          updateURLList(); // Initial URL list update with current logs
-      };
-  </script>
-  <style>
-      /* Add CSS to style the selected URL */
-      .selected {
-          background-color: #d3d3d3; /* Light gray background for selected item */
-          color: #000; /* Text color */
-      }
-  </style>
-  ''');
+            selectedLogIndex = index;
+            updateURLList();
+        } else {
+            details.innerHTML = '<p>Error: Log details not available.</p>';
+        }
+    }
+
+    // Draggable divider functionality
+    function startDragging(e) {
+        isDragging = true;
+        startX = e.clientX;
+        startLeftWidth = document.getElementById('urlListContainer').offsetWidth;
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDragging);
+    }
+
+    function drag(e) {
+        if (isDragging) {
+            var newLeftWidth = startLeftWidth + (e.clientX - startX);
+            document.getElementById('urlListContainer').style.flex = '0 0 ' + newLeftWidth + 'px';
+        }
+    }
+
+    function stopDragging() {
+        isDragging = false;
+        document.removeEventListener('mousemove', drag);
+        document.removeEventListener('mouseup', stopDragging);
+    }
+
+    window.onload = function() {
+        updateURLList();
+    };
+</script>
+
+<style>
+    .selected {
+        background-color: #d3d3d3;
+        color: #000;
+    }
+
+    #resizer {
+        width: 5px;
+        background-color: #ccc;
+        cursor: ew-resize;
+    }
+</style>
+''');
 
     buffer.write('</head><body>');
-
-    // Title displayed only once
     buffer.write('<h1>HTTP Requests Log</h1>');
-
-    // Create the split-screen layout
     buffer.write('<div style="display: flex; height: 80vh;">');
 
-    // Left side: List of URLs
+// Left side: List of URLs
     buffer.write(
         '<div id="urlListContainer" style="flex: 1; border-right: 1px solid #ccc; overflow-y: auto; padding: 10px;">');
     buffer.write('<h2>URLs</h2>');
     buffer.write('<ul id="urlList"></ul>');
     buffer.write('</div>');
 
-    // Right side: Log details
+// Resizer divider
+    buffer.write('<div id="resizer" onmousedown="startDragging(event)"></div>');
+
+// Right side: Log details
     buffer.write(
         '<div id="details" style="flex: 2; padding: 10px; overflow-y: auto;">');
     buffer.write('<p>Select a URL from the list to view details.</p>');
