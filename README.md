@@ -16,7 +16,7 @@ To start using `flutter_http_logger`, add it to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_http_logger: 0.0.3
+  flutter_http_logger: 0.0.4
 ```
 
 Then, import the package:
@@ -49,6 +49,7 @@ HttpLog.sendLog(
   request: dataInJson,
   statusCode: response.statusCode,
   response: response.body,
+  duration: endTime.difference(startTime).inMilliseconds,
 );
 ```
 
@@ -61,6 +62,7 @@ HttpLog.sendLog(
   header: _header,
   statusCode: response.statusCode,
   response: response.body,
+  duration: endTime.difference(startTime).inMilliseconds,
 );
 ```
 
@@ -74,6 +76,7 @@ HttpLog.sendLog(
   request: data,
   statusCode: response.statusCode,
   response: response.body,
+  duration: endTime.difference(startTime).inMilliseconds,
 );
 ```
 
@@ -103,9 +106,15 @@ void main() {
 }
 
 Future<void> httpPost() async {
+
+  // Capture start time
+    final startTime = DateTime.now();
 final response = await http.post(Uri.parse( baseUrl + api),
     header: _header,
     body: dataInJson);
+
+     // Capture end time
+    final endTime = DateTime.now();
 
     // Log the request and response
   HttpLog.sendLog(
@@ -114,6 +123,7 @@ final response = await http.post(Uri.parse( baseUrl + api),
     header: _header,
     request: dataInJson,
     statusCode: response.statusCode,
+     duration: endTime.difference(startTime).inMilliseconds,
     response: response.body,
   );
 }

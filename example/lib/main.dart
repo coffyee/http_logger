@@ -43,8 +43,14 @@ class _HttpLoggerExampleState extends State<HttpLoggerExample> {
     var url = 'https://jsonplaceholder.typicode.com/posts/1';
     var headers = {"Content-Type": "application/json"};
 
+    // Capture start time
+    final startTime = DateTime.now();
+
     // Make the HTTP GET request
     var response = await http.get(Uri.parse(url), headers: headers);
+
+    // Capture end time
+    final endTime = DateTime.now();
 
     // Log the GET request and response
     HttpLog.sendLog(
@@ -52,6 +58,7 @@ class _HttpLoggerExampleState extends State<HttpLoggerExample> {
       url: url,
       header: headers,
       statusCode: response.statusCode,
+      duration: endTime.difference(startTime).inMilliseconds,
       response: response.body,
     );
 
@@ -66,9 +73,15 @@ class _HttpLoggerExampleState extends State<HttpLoggerExample> {
     var headers = {"Content-Type": "application/json"};
     var requestBody = '{"title": "foo", "body": "bar", "userId": 1}';
 
+    // Capture start time
+    final startTime = DateTime.now();
+
     // Make the HTTP POST request
     var response =
         await http.post(Uri.parse(url), headers: headers, body: requestBody);
+
+    // Capture end time
+    final endTime = DateTime.now();
 
     // Log the POST request and response
     HttpLog.sendLog(
@@ -77,6 +90,7 @@ class _HttpLoggerExampleState extends State<HttpLoggerExample> {
       header: headers,
       request: requestBody,
       statusCode: response.statusCode,
+      duration: endTime.difference(startTime).inMilliseconds,
       response: response.body,
     );
 

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// A class for logging HTTP requests and responses in real-time.
@@ -45,8 +44,6 @@ class HttpLog {
   /// If [isSandbox] is set to `true`, the server will run in sandbox mode.
   static void startServer(BuildContext context,
       {final bool isSandbox = true}) async {
-    if (kDebugMode) return;
-
     _isProd = !isSandbox;
 
     if (_isProd) return;
@@ -151,17 +148,16 @@ class HttpLog {
   ///
   /// The [method] represents the HTTP method (GET, POST, etc.). The [url] is the
   /// target URL for the request. Optionally, you can provide [header], [request]
-  /// payload, [statusCode], and [response].
+  /// payload, [statusCode], [duration] and [response].
   static void sendLog({
     required String method,
     required String url,
     Map<String, String>? header,
     Object? request,
     int? statusCode,
+    int? duration,
     Object? response,
   }) {
-    if (kDebugMode) return;
-
     if (_isProd) return;
 
     final _request = request != null
@@ -180,6 +176,7 @@ class HttpLog {
       'header': header,
       'request': _request,
       'status': statusCode,
+      'duration': duration,
       'response': _response,
     };
 
@@ -214,7 +211,7 @@ class HttpLog {
           urlList.innerHTML = '';
           logs.forEach(function(log, index) {
               var listItem = document.createElement('li');
-              listItem.textContent = `\${log.method} Status: \${log.status} \n: \${log.url}`;
+              listItem.textContent = `\${log.method} | Status: \${log.status} | Duration: \${log.duration}ms \n: \${log.url}`;
               listItem.onclick = function() {
                   displayDetails(index);
               };
@@ -247,6 +244,7 @@ class HttpLog {
                 <h3 style=\${log.request == null ? "display:none" : ""}>Request</h3>
                 <pre style=\${log.request == null ? "display:none" : ""}>\${JSON.stringify(log.request, null, 2)}</pre>
                 <h3>Status: \${log.status}</h3>
+                <h3 style=\${log.duration == null ? "display:none" : ""}>Duration: \${log.duration}ms</h3>
                 <h3>Response</h3>
                 <pre style=\${log.response == null ? "display:none" : ""}>\${JSON.stringify(log.response, null, 2)}</pre>
               `;

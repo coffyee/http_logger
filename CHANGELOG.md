@@ -1,5 +1,9 @@
 ## 0.0.3
 
+* Added response duration logging to track the time taken for each HTTP response.
+
+## 0.0.3
+
 * Fixed common issues related to wildcard identifier warnings in the `Navigator.pop()` method.
 * Improved example code for better clarity on usage.
 
