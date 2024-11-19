@@ -1,3 +1,7 @@
+## 0.0.5
+
+* Improved the browser UI for better log display and usability.
+
 ## 0.0.4
 
 * Added response duration logging to track the time taken for each HTTP response.
