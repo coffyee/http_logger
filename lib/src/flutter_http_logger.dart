@@ -100,7 +100,13 @@ class HttpLog {
           });
 
       await for (HttpRequest request in server) {
-        if (request.uri.path == '/logs') {
+        if (request.uri.path == '/clear_logs' && request.method == 'POST') {
+          clearLogs();
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write('Logs cleared successfully')
+            ..close();
+        } else if (request.uri.path == '/logs') {
           // print('-----refresh');
           request.response
             ..headers.contentType = ContentType.html
@@ -187,7 +193,7 @@ class HttpLog {
   static String get logsJson => jsonEncode(_logs);
 
   /// Clears all stored logs.
-  static bool get clearLogs {
+  static bool clearLogs() {
     _logs.clear();
     return true;
   }
@@ -283,6 +289,40 @@ class HttpLog {
     window.onload = function() {
         updateURLList();
     };
+
+   document.addEventListener('DOMContentLoaded', function () {
+    const clearButton = document.getElementById('clearButton');
+    if (clearButton) {
+        clearButton.addEventListener('click', function () {
+            clearLogs();
+        });
+    } else {
+        console.error('Clear Button not found in the DOM');
+    }
+});
+
+
+function clearLogs() {
+    // Prevent accidental triggering
+    console.log('Clear Logs button clicked');
+    
+    // Call Dart's clearLogs function securely
+    fetch('/clear_logs', { method: 'POST' })
+        .then(response => {
+            if (response.ok) {
+                logs = []; // Clear the logs array in JavaScript
+                selectedLogIndex = null; // Reset the selected log index
+                updateURLList(); // Update the UI
+                document.getElementById('details').innerHTML = '<p>No logs available. Logs have been cleared.</p>';
+                console.log('Logs cleared successfully');
+            } else {
+                console.error('Failed to clear logs on server');
+            }
+        })
+        .catch(error => console.error('Error clearing logs:', error));
+}
+
+
 </script>
 
 <style>
@@ -297,10 +337,9 @@ class HttpLog {
         cursor: ew-resize;
     }
 
-    #refreshButton {
+    #refreshButton, #clearButton {
         position: fixed;
         top: 10px;
-        right: 10px;
         padding: 10px;
         background-color: #007bff;
         color: white;
@@ -309,8 +348,17 @@ class HttpLog {
         cursor: pointer;
     }
 
-    #refreshButton:hover {
+    #refreshButton:hover, #clearButton:hover {
         background-color: #0056b3;
+    }
+
+    #refreshButton {
+        left: 320px;
+    }
+
+    #clearButton {
+        left: 400px;
+         background-color: red;
     }
 </style>
 ''');
@@ -318,9 +366,10 @@ class HttpLog {
     buffer.write('</head><body>');
     buffer.write('<h1>HTTP Requests Log</h1>');
 
-// Add the refresh button
+// Add the refresh and clear buttons
     buffer.write(
         '<button id="refreshButton" onclick="refreshPage()">Refresh</button>');
+    buffer.write('<button id="clearButton">Clear</button>');
 
     buffer.write('<div style="display: flex; height: 80vh;">');
 
@@ -343,6 +392,7 @@ class HttpLog {
     buffer.write('</div>'); // End of split-screen layout
 
     buffer.write('</body></html>');
+
     return buffer.toString();
   }
 }
