@@ -276,6 +276,10 @@ class HttpLog {
         document.removeEventListener('mouseup', stopDragging);
     }
 
+    function refreshPage() {
+        window.location.reload();
+    }
+
     window.onload = function() {
         updateURLList();
     };
@@ -292,11 +296,32 @@ class HttpLog {
         background-color: #ccc;
         cursor: ew-resize;
     }
+
+    #refreshButton {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #refreshButton:hover {
+        background-color: #0056b3;
+    }
 </style>
 ''');
 
     buffer.write('</head><body>');
     buffer.write('<h1>HTTP Requests Log</h1>');
+
+// Add the refresh button
+    buffer.write(
+        '<button id="refreshButton" onclick="refreshPage()">Refresh</button>');
+
     buffer.write('<div style="display: flex; height: 80vh;">');
 
 // Left side: List of URLs
