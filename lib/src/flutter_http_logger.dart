@@ -190,7 +190,7 @@ class HttpLog {
   }
 
   /// Returns the logs in JSON format.
-  static String get logsJson => jsonEncode(_logs);
+  static String get logsJson => jsonEncode(_logs.reversed.toList());
 
   /// Clears all stored logs.
   static bool clearLogs() {
