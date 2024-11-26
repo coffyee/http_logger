@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 /// The `HttpLog` class allows you to start a local server to view logs in a
 /// web browser. It supports sending logs for GET, POST, and POST_FILE requests.
 class HttpLog {
-  static bool _isProd = false;
+  static bool _disableLogs = false;
 
   /// Stores the list of logs as a map.
   static final List<Map<String, dynamic>> _logs = [];
@@ -44,9 +44,9 @@ class HttpLog {
   /// If [isSandbox] is set to `true`, the server will run in sandbox mode.
   static void startServer(BuildContext context,
       {final bool isSandbox = true}) async {
-    _isProd = !isSandbox;
+    _disableLogs = !isSandbox;
 
-    if (_isProd) return;
+    if (_disableLogs) return;
 
     try {
       _ip = await _myIp();
@@ -120,32 +120,8 @@ class HttpLog {
         }
       }
     } catch (e) {
-      // Handle server error
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return SimpleDialog(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-              children: [
-                const Text(
-                  "HTTP Local Server Error",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(
-                  height: 24,
-                ),
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text("Close")),
-              ],
-            );
-          });
+      _disableLogs = true;
+      return;
       // print("HTTP Local Server Error : $e");
     }
   }
@@ -164,18 +140,34 @@ class HttpLog {
     int? duration,
     Object? response,
   }) {
-    if (_isProd) return;
+    if (_disableLogs) return;
 
-    final _request = request != null
-        ? ((request is String && request.isNotEmpty)
-            ? json.decode(request)
-            : request)
-        : null;
-    final _response = response != null
-        ? ((response is String && response.isNotEmpty)
-            ? json.decode(response)
-            : response)
-        : null;
+    Object? _request;
+    Object? _response;
+
+    try {
+      if (request != null) {
+        if (request is String && request.isNotEmpty) {
+          _request = json.decode(request);
+        } else {
+          _request = request;
+        }
+      }
+    } catch (e) {
+      _request = request.toString();
+    }
+
+    try {
+      if (response != null) {
+        if (response is String && response.isNotEmpty) {
+          _response = json.decode(response);
+        } else {
+          _response = response;
+        }
+      }
+    } catch (e) {
+      _response = response.toString();
+    }
     final log = {
       'method': method,
       'url': url,
