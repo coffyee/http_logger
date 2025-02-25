@@ -16,7 +16,7 @@ To start using `flutter_http_logger`, add it to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_http_logger: 0.0.7
+  flutter_http_logger: 1.0.0
 ```
 
 Then, import the package:
@@ -33,6 +33,14 @@ To initialize the logger and start the local server, use the `HttpLog.startServe
 
 ```dart
 HttpLog.startServer(context);
+```
+
+### Stopping the Logger
+
+To stop the logger and close the local server, use the `HttpLog.endServer()` function in your app:
+
+```dart
+HttpLog.endServer();
 ```
 
 ### Sending Logs

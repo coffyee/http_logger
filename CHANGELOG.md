@@ -1,3 +1,7 @@
+## 1.0.0
+
+* Added feature for auto-updating HTTP requests on the log list.
+
 ## 0.0.7
 
 * Improved the browser UI for better log display and usability.

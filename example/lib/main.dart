@@ -100,6 +100,12 @@ class _HttpLoggerExampleState extends State<HttpLoggerExample> {
   }
 
   @override
+  void dispose() {
+    HttpLog.endServer();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
