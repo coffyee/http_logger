@@ -136,7 +136,7 @@ class HttpLog {
   }
 
   static Response _serveLogs(Request request) {
-    print(request.url.path);
+    // print(request.url.path);
     if (request.url.path == 'logs') {
       return Response.ok(_generateHtmlContent().codeUnits, headers: {
         'Content-Type': 'text/html',
@@ -407,39 +407,18 @@ class HttpLog {
             });
         }
 
-        var formattedData;
-
         function displayDetails(index) {
             var details = document.getElementById('details');
             var log = logs[index];
 
             if (log && log.url) {
 
-              formattedData = `
-URL: \${log.url}
-
-Header
-\${JSON.stringify(log.header, null, 2)}
-
-\${log.request ? `<h3>Request</h3><pre>\${JSON.stringify(log.request, null, 2)}</pre>` : ''}
-
-Status: \${log.status}
-
-\${log.duration ? `Duration: \${log.duration}ms` : ''}
-
-Response
-\${log.response ? JSON.stringify(log.response, null, 2) : ''}
-        `;
-
-
-
                 details.innerHTML = `
-                   <div  style="display: flex; align-items: center; gap: 20px;"> 
-                <h2>METHOD: \${log.method}</h2>
-               <button onclick="copyToClipboard()">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCVyOP4koLIvHgEyotO8PiONhoAO84Qm8Rhw&s" alt="Copy" style="width: 20px; vertical-align: middle; cursor: pointer;">
-                </button>
-            </div>
+                  <div style="display: flex; align-items: center; gap: 20px;"> 
+                    <h2>METHOD: \${log.method}</h2>
+                    <button onclick="copyToClipboard()">Copy</button>
+                    <label><input type="checkbox" id="headerCheckbox"> Include Header</label>
+                </div>
                    </div>
                     <h3>Header</h3>
                     <pre>\${JSON.stringify(log.header, null, 2)}</pre>
@@ -461,9 +440,22 @@ Response
 
 // Function to copy formatted data to clipboard
 function copyToClipboard() {
-console.log(formattedData);
+  var log = logs[selectedLogIndex];
+   var includeHeader = document.getElementById('headerCheckbox').checked;
+
+     var dataToCopy = `URL: \${log.url}\n\n`;
+
+      if (includeHeader) {
+            dataToCopy += `Header:\n\${JSON.stringify(log.header, null, 2)}\n\n`;
+        }
+
+        dataToCopy += log.request ? `Request:\n\${JSON.stringify(log.request, null, 2)}\n\n` : '';
+        dataToCopy += `Status: \${log.status}\n\n`;
+        dataToCopy += log.duration ? `Duration: \${log.duration}ms\n\n` : '';
+        dataToCopy += log.response ? `Response:\n\${JSON.stringify(log.response, null, 2)}` : '';
+
     const tempInput = document.createElement('textarea');
-    tempInput.value = formattedData;
+    tempInput.value = dataToCopy;
     document.body.appendChild(tempInput);
     tempInput.select();
     document.execCommand('copy');
