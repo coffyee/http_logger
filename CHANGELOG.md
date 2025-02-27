@@ -1,3 +1,7 @@
+## 1.0.1
+
+* Added better functionality for copying data.
+
 ## 1.0.0
 
 * Added feature for auto-updating HTTP requests on the log list.
