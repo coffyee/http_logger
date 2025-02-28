@@ -7,6 +7,8 @@ import 'package:shelf/shelf_io.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import 'ip_dia.dart';
+
 /// A class for logging HTTP requests and responses in real-time.
 ///
 /// The `HttpLog` class allows you to start a local server to view logs in a
@@ -26,6 +28,8 @@ class HttpLog {
   /// A controller where [_syncController] can be listened to more than once.
   static final _syncController = StreamController<String>.broadcast();
 
+  static WebSocketChannel? _channel;
+
   /// Retrieves the device's IP address for IPv4.
   ///
   /// This method is used internally to fetch the local IP address, which is used
@@ -34,12 +38,19 @@ class HttpLog {
     try {
       final interfaces = await NetworkInterface.list(
           type: InternetAddressType.IPv4, includeLinkLocal: true);
-      return interfaces
-          .where((e) => e.addresses.first.address.indexOf('192.') == 0)
-          .first
-          .addresses
-          .first
-          .address;
+      // Filter for common local network IPs (e.g., 192.168.*, 10.*, 172.*)
+      final localIps = interfaces
+          .expand((e) => e.addresses)
+          .where(
+              (a) => a.address.startsWith('192.') || a.address.startsWith('10.')
+              // || a.address.startsWith('172.')
+              )
+          .map((a) => a.address)
+          .toList();
+
+      if (localIps.isNotEmpty) {
+        return localIps.first; // Return the first valid local IP
+      }
     } catch (e) {
       // Handle IP fetch error
       // print('192.. IP is not found $e');
@@ -67,63 +78,37 @@ class HttpLog {
     }
 
     try {
-      final handler = Cascade()
-          .add(_serveLogs)
-          .add(webSocketHandler((WebSocketChannel webSocket) {
-        _syncController.stream.listen((data) {
-          webSocket.sink.add(data);
-        });
-      })).handler;
+      final _urlCltr = TextEditingController(text: '192.168.1.');
 
-      _server = await serve(handler, _ip ?? InternetAddress.anyIPv4, 9090);
+      final bool _isRealDevice = _ip!.startsWith('192.');
 
-      // log('HTTP Logger server running on http://${server.address.address}:${server.port}');
-      final _url = "http://${_server.address.address}:${_server.port}/logs";
-      showDialog(
+      if (_isRealDevice) {
+        final handler = Cascade()
+            .add(_serveLogs)
+            .add(webSocketHandler((WebSocketChannel webSocket) {
+          _syncController.stream.listen((data) {
+            webSocket.sink.add(data);
+          });
+        })).handler;
+
+        _server = await serve(handler, _ip ?? InternetAddress.anyIPv4, 9090);
+
+        // log('HTTP Logger server running on http://${server.address.address}:${server.port}');
+        _urlCltr.text =
+            "http://${_server.address.address}:${_server.port}/logs";
+      }
+
+      await showDialog(
           context: context,
           builder: (BuildContext context) {
-            return SimpleDialog(
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-              children: [
-                const Center(
-                  child: Text(
-                    "IP Address",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        border: Border.all(color: Colors.black26)),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 12),
-                    child: SelectableText(
-                      _url,
-                      style: const TextStyle(
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 24,
-                ),
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text("Close")),
-              ],
-            );
-          });
+            return IpDialog(urlCltr: _urlCltr, isRealDevice: _isRealDevice);
+          }).then((_) {
+        if (!_isRealDevice) {
+          final url = 'ws://${_urlCltr.text}:9090';
+          _channel = WebSocketChannel.connect(Uri.parse(url));
+          // print(url);
+        }
+      });
     } catch (e) {
       _disableLogs = true;
       return;
@@ -133,6 +118,7 @@ class HttpLog {
   static void endServer() {
     _server.close();
     _syncController.close();
+    _channel?.sink.close();
   }
 
   static Response _serveLogs(Request request) {
@@ -200,8 +186,12 @@ class HttpLog {
       'response': _response,
     };
 
-    _syncController.add(json.encode(log));
-    _logs.add(log);
+    if (_channel != null) {
+      _channel!.sink.add(json.encode(log));
+    } else {
+      _syncController.add(json.encode(log));
+      _logs.add(log);
+    }
   }
 
   /// Returns the logs in JSON format.
