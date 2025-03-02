@@ -16,7 +16,7 @@ To start using `flutter_http_logger`, add it to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_http_logger: 1.0.2
+  flutter_http_logger: 1.0.3
 ```
 
 Then, import the package:
@@ -141,7 +141,7 @@ final response = await http.post(Uri.parse( baseUrl + api),
 }
 ```
 
-## Setup Instructions (For Android Emulators Only)
+## Additional Setup Instructions (For Android Emulators Only)
 
 To use `flutter_http_logger`, follow these steps:
 

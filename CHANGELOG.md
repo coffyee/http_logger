@@ -1,3 +1,7 @@
+## 1.0.3
+
+* Bug fixed.
+
 ## 1.0.2
 
 * Runs also in Android emulators now.
