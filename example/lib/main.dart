@@ -7,25 +7,24 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'HTTP Logger Example',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: const HttpLoggerExample(),
     );
   }
 }
 
 class HttpLoggerExample extends StatefulWidget {
-  const HttpLoggerExample({Key? key}) : super(key: key);
+  const HttpLoggerExample({super.key});
 
   @override
-  _HttpLoggerExampleState createState() => _HttpLoggerExampleState();
+  State<HttpLoggerExample> createState() => _HttpLoggerExampleState();
 }
 
 class _HttpLoggerExampleState extends State<HttpLoggerExample> {
@@ -77,8 +76,11 @@ class _HttpLoggerExampleState extends State<HttpLoggerExample> {
     final startTime = DateTime.now();
 
     // Make the HTTP POST request
-    var response =
-        await http.post(Uri.parse(url), headers: headers, body: requestBody);
+    var response = await http.post(
+      Uri.parse(url),
+      headers: headers,
+      body: requestBody,
+    );
 
     // Capture end time
     final endTime = DateTime.now();
@@ -108,9 +110,7 @@ class _HttpLoggerExampleState extends State<HttpLoggerExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('HTTP Logger Example'),
-      ),
+      appBar: AppBar(title: const Text('HTTP Logger Example')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -126,11 +126,7 @@ class _HttpLoggerExampleState extends State<HttpLoggerExample> {
             ),
             const SizedBox(height: 20),
             const Text('Response:'),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Text(_response),
-              ),
-            ),
+            Expanded(child: SingleChildScrollView(child: Text(_response))),
           ],
         ),
       ),
