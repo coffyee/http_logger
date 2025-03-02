@@ -159,10 +159,11 @@ To use `flutter_http_logger`, follow these steps:
    npm start
    ```
 
-5. If you encounter an error stating that `npm` is not found, install Node.js and set the system path for Node.
-6. Once the setup is complete, every time you run the app, navigate to the file location, open the terminal, and run `npm start`. You are ready to go!
+5. **If you encounter an error stating that npm is not found, install Node.js and set the system path for Node.**
+6. **Once the setup is complete, every time you run the app, navigate to the file location, open the terminal, and run `npm start`.**
+7. **After starting the server, an IP address will be displayed. Open a browser and enter that IP, and you need to input that IP into your Flutter app. You are ready to go!**
 
-## Contributing
+## Contributings
 
 Contributions are welcome! If you have any issues or feature requests, feel free to open an issue or submit a pull request.
 
