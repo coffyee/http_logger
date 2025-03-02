@@ -49,7 +49,12 @@ class HttpLog {
           .toList();
 
       if (localIps.isNotEmpty) {
-        return localIps.first; // Return the first valid local IP
+        if (localIps.any(((e) => e.startsWith('192.')))) {
+          return localIps.firstWhere(
+              ((e) => e.startsWith('192.'))); // Return the first valid local IP
+        } else {
+          return localIps.first;
+        }
       }
     } catch (e) {
       // Handle IP fetch error
@@ -78,11 +83,11 @@ class HttpLog {
     }
 
     try {
-      final _urlCltr = TextEditingController(text: '192.168.1.');
+      final urlCltr = TextEditingController(text: '192.168.1.');
 
-      final bool _isRealDevice = _ip!.startsWith('192.');
+      final bool isRealDevice = _ip!.startsWith('192.');
 
-      if (_isRealDevice) {
+      if (isRealDevice) {
         final handler = Cascade()
             .add(_serveLogs)
             .add(webSocketHandler((WebSocketChannel webSocket) {
@@ -94,17 +99,17 @@ class HttpLog {
         _server = await serve(handler, _ip ?? InternetAddress.anyIPv4, 9090);
 
         // log('HTTP Logger server running on http://${server.address.address}:${server.port}');
-        _urlCltr.text =
-            "http://${_server.address.address}:${_server.port}/logs";
+        urlCltr.text = "http://${_server.address.address}:${_server.port}/logs";
       }
 
       await showDialog(
+          // ignore: use_build_context_synchronously
           context: context,
           builder: (BuildContext context) {
-            return IpDialog(urlCltr: _urlCltr, isRealDevice: _isRealDevice);
+            return IpDialog(urlCltr: urlCltr, isRealDevice: isRealDevice);
           }).then((_) {
-        if (!_isRealDevice) {
-          final url = 'ws://${_urlCltr.text}:9090';
+        if (!isRealDevice) {
+          final url = 'ws://${urlCltr.text}:9090';
           _channel = WebSocketChannel.connect(Uri.parse(url));
           // print(url);
         }
@@ -150,40 +155,40 @@ class HttpLog {
   }) {
     if (_disableLogs) return;
 
-    Object? _request;
-    Object? _response;
+    Object? request0;
+    Object? response0;
 
     try {
       if (request != null) {
         if (request is String && request.isNotEmpty) {
-          _request = json.decode(request);
+          request0 = json.decode(request);
         } else {
-          _request = request;
+          request0 = request;
         }
       }
     } catch (e) {
-      _request = request.toString();
+      request0 = request.toString();
     }
 
     try {
       if (response != null) {
         if (response is String && response.isNotEmpty) {
-          _response = json.decode(response);
+          response0 = json.decode(response);
         } else {
-          _response = response;
+          response0 = response;
         }
       }
     } catch (e) {
-      _response = response.toString();
+      response0 = response.toString();
     }
     final log = {
       'method': method,
       'url': url,
       'header': header,
-      'request': _request,
+      'request': request0,
       'status': statusCode,
       'duration': duration,
-      'response': _response,
+      'response': response0,
     };
 
     if (_channel != null) {
@@ -389,7 +394,7 @@ class HttpLog {
                     listItem.style.color = 'red';
                 }
 
-                if (index === selectedLogIndex) {
+                if (index === logs.length - selectedLogIndex) {
                     listItem.classList.add('selected');
                 }
 
@@ -420,7 +425,7 @@ class HttpLog {
                     \${log.response ? `<pre>\${JSON.stringify(log.response, null, 2)}</pre>` : ''}
                 `;
 
-                selectedLogIndex = index;
+                selectedLogIndex = logs.length - index;
                 updateURLList();
             } else {
                 details.innerHTML = '<p>Error: Log details not available.</p>';
@@ -430,7 +435,7 @@ class HttpLog {
 
 // Function to copy formatted data to clipboard
 function copyToClipboard() {
-  var log = logs[selectedLogIndex];
+  var log = logs[logs.length - selectedLogIndex];
    var includeHeader = document.getElementById('headerCheckbox').checked;
 
      var dataToCopy = `URL: \${log.url}\n\n`;
