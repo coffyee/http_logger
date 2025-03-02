@@ -1,3 +1,7 @@
+## 1.0.2
+
+* Runs also in Android emulators now.
+
 ## 1.0.1
 
 * Added better functionality for copying data.
