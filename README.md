@@ -99,21 +99,25 @@ Here is a simple example of how to integrate `flutter_http_logger` with an HTTP 
 ```dart
 import 'package:flutter_http_logger/flutter_http_logger.dart';
 
-void main() {
-  // Initialize the HTTP Logger
-  HttpLog.startServer(context);
+class _MyWidgetState extends State<MyWidget> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the HTTP Logger
+    HttpLog.startServer(context);
 
-  // Example HTTP POST request
-  var response = await http.post(
-    Uri.parse(baseUrl + api),
-    headers: _header,
-    body: dataInJson,
-  );
+    _makeHttpRequest();
+  }
 
-  
+  @override
+  void dispose() {
+    // End the HTTP Logger
+    HttpLog.endServer();
+    super.dispose();
+  }
 }
 
-Future<void> httpPost() async {
+Future<void> _makeHttpRequest() async {
 
   // Capture start time
     final startTime = DateTime.now();
@@ -136,6 +140,27 @@ final response = await http.post(Uri.parse( baseUrl + api),
   );
 }
 ```
+
+## Setup Instructions (For Android Emulators Only)
+
+To use `flutter_http_logger`, follow these steps:
+
+1. Download the required file from [flutter_http_logger_emu](https://github.com/coffyee/http_logger/archive/refs/heads/main.zip).
+2. Open the command prompt or terminal and navigate to the file location.
+3. Run the following command to install dependencies:
+
+   ```sh
+   npm install
+   ```
+
+4. Start the local server by running:
+
+   ```sh
+   npm start
+   ```
+
+5. If you encounter an error stating that `npm` is not found, install Node.js and set the system path for Node.
+6. Once the setup is complete, every time you run the app, navigate to the file location, open the terminal, and run `npm start`. You are ready to go!
 
 ## Contributing
 
