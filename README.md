@@ -145,7 +145,7 @@ final response = await http.post(Uri.parse( baseUrl + api),
 
 To use `flutter_http_logger`, follow these steps:
 
-1. Download the required file from [flutter_http_logger_emu](https://github.com/coffyee/http_logger/archive/refs/heads/main.zip).
+1. Download the required file from [flutter_http_logger_emu](https://github.com/coffyee/flutter_http_logger_emu/archive/refs/heads/main.zip).
 2. Open the command prompt or terminal and navigate to the file location.
 3. Run the following command to install dependencies:
 
