@@ -16,7 +16,7 @@ To start using `flutter_http_logger`, add it to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_http_logger: 1.0.3
+  flutter_http_logger: 1.0.4
 ```
 
 Then, import the package:
