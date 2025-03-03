@@ -109,8 +109,14 @@ class HttpLog {
             return IpDialog(urlCltr: urlCltr, isRealDevice: isRealDevice);
           }).then((_) {
         if (!isRealDevice) {
-          final url = 'ws://${urlCltr.text}:9090';
-          _channel = WebSocketChannel.connect(Uri.parse(url));
+          try {
+            if (!urlCltr.text.endsWith('.')) {
+              final url = 'ws://${urlCltr.text}:9090';
+              _channel = WebSocketChannel.connect(Uri.parse(url));
+            }
+          } catch (e) {
+            _channel = null;
+          }
           // print(url);
         }
       });
