@@ -103,7 +103,6 @@ class _HttpLoggerExampleState extends State<HttpLoggerExample> {
 
   @override
   void dispose() {
-    HttpLog.endServer();
     super.dispose();
   }
 

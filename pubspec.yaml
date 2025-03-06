@@ -1,6 +1,6 @@
 name: flutter_http_logger
 description: A Flutter package to log HTTP requests and responses, making it easier to debug and monitor network traffic in real-time.
-version: 1.0.5
+version: 1.0.6
 homepage: https://github.com/coffyee/http_logger.git
 
 environment:
@@ -13,6 +13,7 @@ dependencies:
   shelf: ^1.3.2
   web_socket_channel: ^2.4.0
   shelf_web_socket: ^1.0.2
+  shared_preferences: ^2.0.15
 
 dev_dependencies:
   flutter_test:

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_http_logger/src/share_pref.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
@@ -20,10 +21,10 @@ class HttpLog {
   static final List<Map<String, dynamic>> _logs = [];
 
   /// The IP address of the device.
-  static String? ipAddress = "";
+  static String? ipAddress;
 
   /// The HTTP server [_server] instance used for logging.
-  static late HttpServer _server;
+  // static HttpServer? _server;
 
   /// A controller where [_syncController] can be listened to more than once.
   static final _syncController = StreamController<String>.broadcast();
@@ -63,7 +64,7 @@ class HttpLog {
     return null;
   }
 
-  static late String? _ip;
+  static bool get _isRealDevice => ipAddress?.startsWith('192.') ?? false;
 
   /// Starts the HTTP logging server on the device.
   ///
@@ -75,9 +76,9 @@ class HttpLog {
 
     if (_disableLogs) return;
 
-    _ip = await _myIp();
+    ipAddress = await _myIp();
 
-    if (_ip == null || _ip!.isEmpty) {
+    if (ipAddress == null || ipAddress!.isEmpty) {
       _disableLogs = true;
       return;
     }
@@ -85,7 +86,7 @@ class HttpLog {
     try {
       final urlCltr = TextEditingController(text: '192.168.1.');
 
-      final bool isRealDevice = _ip!.startsWith('192.');
+      final isRealDevice = _isRealDevice;
 
       if (isRealDevice) {
         final handler = Cascade()
@@ -96,10 +97,15 @@ class HttpLog {
           });
         })).handler;
 
-        _server = await serve(handler, _ip ?? InternetAddress.anyIPv4, 9090);
+        final _server =
+            await serve(handler, ipAddress ?? InternetAddress.anyIPv4, 9090);
 
         // log('HTTP Logger server running on http://${server.address.address}:${server.port}');
         urlCltr.text = "http://${_server.address.address}:${_server.port}/logs";
+      } else {
+        final _urllocal = await SharedPref.getUrl;
+
+        if (_urllocal.isNotEmpty) urlCltr.text = _urllocal;
       }
 
       await showDialog(
@@ -110,7 +116,8 @@ class HttpLog {
           }).then((_) {
         if (!isRealDevice) {
           try {
-            if (!urlCltr.text.endsWith('.')) {
+            if (!urlCltr.text.trim().endsWith('.')) {
+              SharedPref.setUrl = urlCltr.text;
               final url = 'ws://${urlCltr.text}:9090';
               _channel = WebSocketChannel.connect(Uri.parse(url));
             }
@@ -126,11 +133,13 @@ class HttpLog {
     }
   }
 
-  static void endServer() {
-    _server.close();
-    _syncController.close();
-    _channel?.sink.close();
-  }
+  // static void endServer() {
+  //   if (_channel != null) {
+  //     _channel?.sink.close();
+  //   } else {
+  //     _syncController.close();
+  //   }
+  // }
 
   static Response _serveLogs(Request request) {
     // print(request.url.path);
@@ -197,7 +206,7 @@ class HttpLog {
       'response': response0,
     };
 
-    if (_channel != null) {
+    if (_channel != null && !_isRealDevice) {
       _channel!.sink.add(json.encode(log));
     } else {
       _syncController.add(json.encode(log));

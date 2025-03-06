@@ -21,6 +21,21 @@ class IpDialog extends StatelessWidget {
             ),
           ),
         ),
+        if (!isRealDevice) ...[
+          const SizedBox(
+            height: 12,
+          ),
+          const Center(
+            child: Text(
+              "Enter the IP address only",
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.black54,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          )
+        ],
         const SizedBox(
           height: 20,
         ),
