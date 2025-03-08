@@ -1,3 +1,7 @@
+## 1.0.7
+
+* Desktop Applications added for mac and windows.
+
 ## 1.0.6
 
 * Bug fixed.

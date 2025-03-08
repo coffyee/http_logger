@@ -121,6 +121,12 @@ class HttpLog {
               final url = 'ws://${urlCltr.text}:9090';
               _channel = WebSocketChannel.connect(Uri.parse(url));
             }
+          } on SocketException catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Error: ${e.message}'),
+              duration: const Duration(seconds: 3),
+            ));
+            _channel = null;
           } catch (e) {
             _channel = null;
           }

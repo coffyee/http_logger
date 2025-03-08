@@ -16,7 +16,7 @@ To start using `flutter_http_logger`, add it to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_http_logger: 1.0.6
+  flutter_http_logger: 1.0.7
 ```
 
 Then, import the package:
@@ -135,25 +135,33 @@ final response = await http.post(Uri.parse( baseUrl + api),
 
 ## Additional Setup Instructions (For Android Emulators Only)
 
-To use `flutter_http_logger`, follow these steps:
+### **1. For macOS & Windows (Desktop App)**
+For an easy setup on desktop, download and run the appropriate application for your system:
 
-1. Download the required file from [flutter_http_logger_emu](https://github.com/coffyee/flutter_http_logger_emu/archive/refs/heads/main.zip).
-2. Open the command prompt or terminal and navigate to the file location.
-3. Run the following command to install dependencies:
+- **Windows App:** [Download](https://github.com/coffyee/Flutter-HTTP-logger-desktop-files/raw/main/Flutter%20HTTP%20Logger.exe)
+- **Mac App:** [Download](https://github.com/coffyee/Flutter-HTTP-logger-desktop-files/raw/main/Flutter%20HTTP%20Logger.zip)
 
+Once installed, the application will handle logging automatically.
+
+
+### **2. If You Don't Want to Use a Desktop Application**
+If you prefer not to use a desktop application, you can try running the JavaScript files with Node.js. Follow these steps:
+
+1. Download the [flutter_http_logger_emu](https://github.com/coffyee/flutter_http_logger_emu/archive/refs/heads/main.zip).
+2. Extract the files and **rename the JavaScript files as needed**.
+3. Open a terminal or command prompt and navigate to the folder containing the files.
+4. Install dependencies:
    ```sh
    npm install
    ```
-
-4. Start the local server by running:
-
+5. Start the server:
    ```sh
-   npm start
+   node server.js
    ```
+6. Once started, the server will display an IP address. Open a browser, enter that IP, and input it into your Flutter app to begin logging.
 
-5. **If you encounter an error stating that npm is not found, install Node.js and set the system path for Node.**
-6. **Once the setup is complete, every time you run the app, navigate to the file location, open the terminal, and run `npm start`.**
-7. **After starting the server, an IP address will be displayed. Open a browser and enter that IP, and you need to input that IP into your Flutter app. You are ready to go!**
+This method allows you to use `flutter_http_logger` without installing any additional desktop applications.
+
 
 ## Contributings
 
