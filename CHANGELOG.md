@@ -1,3 +1,7 @@
+## 1.0.8
+
+* Improved IP address entry for emulator usage.
+
 ## 1.0.7
 
 * Desktop Applications added for mac and windows.
