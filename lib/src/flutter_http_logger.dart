@@ -91,7 +91,7 @@ class HttpLog {
       if (isRealDevice) {
         final handler = Cascade()
             .add(_serveLogs)
-            .add(webSocketHandler((WebSocketChannel webSocket) {
+            .add(webSocketHandler((WebSocketChannel webSocket, _) {
           _syncController.stream.listen((data) {
             webSocket.sink.add(data);
           });

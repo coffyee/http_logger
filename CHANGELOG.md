@@ -1,3 +1,7 @@
+## 1.0.9
+
+* Package version updated.
+
 ## 1.0.8
 
 * Improved IP address entry for emulator usage.
