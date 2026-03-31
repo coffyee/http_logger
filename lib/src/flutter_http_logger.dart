@@ -492,24 +492,18 @@ class HttpLog {
              if (index !== -1) {
         // ✅ update existing log
         logs[index] = data.log;
+
+               // ✅ update right panel if this log is selected
         if(logs.length - selectedLogIndex === index)
         {
          displayDetails(logs.length - selectedLogIndex);
          }
-
-          // ✅ update right panel if this log is selected
-      
-
 
     } else {
         // ✅ insert new log
         logs.unshift(data.log);
 
     }
-
-           
-        
-
             updateURLList();
             console.log("Log data added:", logs);
         };
