@@ -245,7 +245,7 @@ class HttpLog {
   /// target URL for the request. Optionally, you can provide [header], [request]
   /// payload, [statusCode], [duration] and [response].
   static void sendLog({
-    required int id,
+    int? id,
     required String method,
     required String url,
     Map<String, String>? header,
@@ -295,6 +295,8 @@ class HttpLog {
     if (_channel != null && !_isRealDevice) {
       _channel!.sink.add(json.encode(log));
     } else {
+      id ??= DateTime.now().millisecondsSinceEpoch;
+
       _syncController.add(
         json.encode({
           'type': 'update',

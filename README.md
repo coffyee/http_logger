@@ -16,7 +16,7 @@ To start using `flutter_http_logger`, add it to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_http_logger: 1.0.9
+  flutter_http_logger: 1.1.0
 ```
 
 Then, import the package:
@@ -38,6 +38,20 @@ HttpLog.startServer(context);
 ### Sending Logs
 
 Whenever you make an HTTP request, log the request and response details using the `HttpLog.sendLog()` function. Here are examples for different HTTP methods:
+
+#### Logging a POST Request with HTTP function
+
+```dart
+HttpLog.run<Response>(
+  method: "POST",
+  url: url,
+  header: headers,
+  request: dataInJson,
+  function: () => http.post(Uri.parse(url), headers: headers, body: requestBody),
+  statusCode: (r) => r.statusCode,
+  resBody: (r) => r.body,
+);
+```
 
 #### Logging a POST Request
 

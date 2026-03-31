@@ -1,3 +1,7 @@
+## 1.1.0
+
+* Feature updated.
+
 ## 1.0.9
 
 * Package version updated.
