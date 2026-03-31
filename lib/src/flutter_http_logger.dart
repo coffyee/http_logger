@@ -38,21 +38,24 @@ class HttpLog {
   static Future<String?> _myIp() async {
     try {
       final interfaces = await NetworkInterface.list(
-          type: InternetAddressType.IPv4, includeLinkLocal: true);
+        type: InternetAddressType.IPv4,
+        includeLinkLocal: true,
+      );
       // Filter for common local network IPs (e.g., 192.168.*, 10.*, 172.*)
       final localIps = interfaces
           .expand((e) => e.addresses)
           .where(
-              (a) => a.address.startsWith('192.') || a.address.startsWith('10.')
-              // || a.address.startsWith('172.')
-              )
+            (a) => a.address.startsWith('192.') || a.address.startsWith('10.'),
+            // || a.address.startsWith('172.')
+          )
           .map((a) => a.address)
           .toList();
 
       if (localIps.isNotEmpty) {
         if (localIps.any(((e) => e.startsWith('192.')))) {
           return localIps.firstWhere(
-              ((e) => e.startsWith('192.'))); // Return the first valid local IP
+            ((e) => e.startsWith('192.')),
+          ); // Return the first valid local IP
         } else {
           return localIps.first;
         }
@@ -70,8 +73,11 @@ class HttpLog {
   ///
   /// The [context] parameter is required to show a dialog with the local server URL.
   /// If [isSandbox] is set to `true`, the server will run in sandbox mode.
-  static void startServer(BuildContext context,
-      {final bool isSandbox = true, final String? cusIPForEmu}) async {
+  static void startServer(
+    BuildContext context, {
+    final bool isSandbox = true,
+    final String? cusIPForEmu,
+  }) async {
     _disableLogs = !isSandbox;
 
     if (_disableLogs) return;
@@ -89,16 +95,19 @@ class HttpLog {
       final isRealDevice = _isRealDevice;
 
       if (isRealDevice) {
-        final handler = Cascade()
-            .add(_serveLogs)
-            .add(webSocketHandler((WebSocketChannel webSocket, _) {
-          _syncController.stream.listen((data) {
-            webSocket.sink.add(data);
-          });
-        })).handler;
+        final handler = Cascade().add(_serveLogs).add(
+          webSocketHandler((WebSocketChannel webSocket, _) {
+            _syncController.stream.listen((data) {
+              webSocket.sink.add(data);
+            });
+          }),
+        ).handler;
 
-        final _server =
-            await serve(handler, ipAddress ?? InternetAddress.anyIPv4, 9090);
+        final _server = await serve(
+          handler,
+          ipAddress ?? InternetAddress.anyIPv4,
+          9090,
+        );
 
         // log('HTTP Logger server running on http://${server.address.address}:${server.port}');
         urlCltr.text = "http://${_server.address.address}:${_server.port}/logs";
@@ -116,11 +125,12 @@ class HttpLog {
       }
 
       await showDialog(
-          // ignore: use_build_context_synchronously
-          context: context,
-          builder: (BuildContext context) {
-            return IpDialog(urlCltr: urlCltr, isRealDevice: isRealDevice);
-          }).then((_) {
+        // ignore: use_build_context_synchronously
+        context: context,
+        builder: (BuildContext context) {
+          return IpDialog(urlCltr: urlCltr, isRealDevice: isRealDevice);
+        },
+      ).then((_) {
         _setEmuDevice(urlCltr, isRealDevice, context);
       });
     } catch (e) {
@@ -132,7 +142,10 @@ class HttpLog {
   // static bool _isEmuConnected = false;
 
   static void _setEmuDevice(
-      TextEditingController urlCltr, bool isRealDevice, BuildContext context) {
+    TextEditingController urlCltr,
+    bool isRealDevice,
+    BuildContext context,
+  ) {
     if (!isRealDevice) {
       try {
         if (!urlCltr.text.trim().endsWith('.')) {
@@ -142,10 +155,12 @@ class HttpLog {
           // _isEmuConnected = true;
         }
       } on SocketException catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error: ${e.message}'),
-          duration: const Duration(seconds: 3),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.message}'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
         _channel = null;
       } catch (e) {
         _channel = null;
@@ -165,14 +180,63 @@ class HttpLog {
   static Response _serveLogs(Request request) {
     // print(request.url.path);
     if (request.url.path == 'logs') {
-      return Response.ok(_generateHtmlContent().codeUnits, headers: {
-        'Content-Type': 'text/html',
-      });
+      return Response.ok(
+        _generateHtmlContent().codeUnits,
+        headers: {'Content-Type': 'text/html'},
+      );
     } else if (request.url.path == 'clear_logs' && request.method == 'POST') {
       clearLogs();
       return Response.ok('Logs cleared successfully');
     }
     return Response.notFound('Not found');
+  }
+
+  static Future<T> run<T>({
+    required String method,
+    required String url,
+    Map<String, String>? header,
+    Object? request,
+    required Future<T> Function() function,
+    int Function(T r)? statusCode,
+    String? Function(T r)? resBody,
+  }) async {
+    final startTime = DateTime.now();
+    final id = startTime.millisecondsSinceEpoch;
+
+    // Log request
+    sendLog(id: id, method: method, url: url, header: header, request: request);
+
+    try {
+      final response = await function();
+      final endTime = DateTime.now();
+
+      sendLog(
+        id: id,
+        method: method,
+        url: url,
+        header: header,
+        request: request,
+        statusCode: statusCode?.call(response),
+        duration: endTime.difference(startTime).inMilliseconds,
+        response: resBody?.call(response),
+      );
+
+      return response;
+    } catch (e) {
+      final endTime = DateTime.now();
+
+      sendLog(
+        id: id,
+        method: method,
+        url: url,
+        header: header,
+        request: request,
+        duration: endTime.difference(startTime).inMilliseconds,
+        response: e.toString(),
+      );
+
+      rethrow;
+    }
   }
 
   /// Logs HTTP request and response details.
@@ -181,6 +245,7 @@ class HttpLog {
   /// target URL for the request. Optionally, you can provide [header], [request]
   /// payload, [statusCode], [duration] and [response].
   static void sendLog({
+    required int id,
     required String method,
     required String url,
     Map<String, String>? header,
@@ -222,16 +287,29 @@ class HttpLog {
       'url': url,
       'header': header,
       'request': request0,
-      'status': statusCode,
-      'duration': duration,
+      'status': statusCode ?? 'pending',
+      'duration': duration ?? 'pending ',
       'response': response0,
     };
 
     if (_channel != null && !_isRealDevice) {
       _channel!.sink.add(json.encode(log));
     } else {
-      _syncController.add(json.encode(log));
-      _logs.add(log);
+      _syncController.add(
+        json.encode({
+          'type': 'update',
+          'log': {'id': id, ...log},
+        }),
+      );
+      final index = _logs.indexWhere((e) => e['id'] == id);
+
+      if (index != -1) {
+        // ✅ Update existing log
+        _logs[index] = {..._logs[index], ...log};
+      } else {
+        // ✅ Create new log (first call)
+        _logs.add({'id': id, ...log});
+      }
     }
   }
 
@@ -409,7 +487,29 @@ class HttpLog {
         
         socket.onmessage = async (event) => {
             const data = JSON.parse(event.data);
-            logs.unshift(data);
+            const index = logs.findIndex(l => l.id === data.log.id);
+
+             if (index !== -1) {
+        // ✅ update existing log
+        logs[index] = data.log;
+        if(logs.length - selectedLogIndex === index)
+        {
+         displayDetails(logs.length - selectedLogIndex);
+         }
+
+          // ✅ update right panel if this log is selected
+      
+
+
+    } else {
+        // ✅ insert new log
+        logs.unshift(data.log);
+
+    }
+
+           
+        
+
             updateURLList();
             console.log("Log data added:", logs);
         };
@@ -426,9 +526,13 @@ class HttpLog {
                     displayDetails(index);
                 };
 
-                if (log.status !== 200) {
-                    listItem.style.color = 'red';
-                }
+                if (log.status === 'pending') {
+    listItem.style.color = '#ff9c07';
+} else if (log.status !== 200) {
+    listItem.style.color = 'red';
+} else {
+    listItem.style.color = 'black';
+}
 
                 if (index === logs.length - selectedLogIndex) {
                     listItem.classList.add('selected');

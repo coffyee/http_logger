@@ -45,20 +45,50 @@ class _HttpLoggerExampleState extends State<HttpLoggerExample> {
     // Capture start time
     final startTime = DateTime.now();
 
+    // Log the GET request and response before getting response
+    HttpLog.sendLog(
+      id: startTime.millisecondsSinceEpoch,
+      method: "GET",
+      url: url,
+      header: headers,
+    );
+
     // Make the HTTP GET request
     var response = await http.get(Uri.parse(url), headers: headers);
+
+    await Future.delayed(Duration(seconds: 5));
 
     // Capture end time
     final endTime = DateTime.now();
 
-    // Log the GET request and response
+    // Log the GET request and response after getting response from api
     HttpLog.sendLog(
+      id: startTime.millisecondsSinceEpoch,
       method: "GET",
       url: url,
       header: headers,
       statusCode: response.statusCode,
       duration: endTime.difference(startTime).inMilliseconds,
       response: response.body,
+    );
+
+    setState(() {
+      _response = response.body;
+    });
+  }
+
+  // Function to make a simple GET request : Method 2
+  Future<void> _makeGetRequest2() async {
+    var url = 'https://jsonplaceholder.typicode.com/posts/1';
+    var headers = {"Content-Type": "application/json"};
+
+    final response = await HttpLog.run<http.Response>(
+      method: "GET",
+      url: url,
+      header: headers,
+      function: () => http.get(Uri.parse(url), headers: headers),
+      statusCode: (r) => r.statusCode,
+      resBody: (r) => r.body,
     );
 
     setState(() {
@@ -75,6 +105,15 @@ class _HttpLoggerExampleState extends State<HttpLoggerExample> {
     // Capture start time
     final startTime = DateTime.now();
 
+    // Log the POST request and response before getting response
+    HttpLog.sendLog(
+      id: startTime.millisecondsSinceEpoch,
+      method: "POST",
+      url: url,
+      header: headers,
+      request: requestBody,
+    );
+
     // Make the HTTP POST request
     var response = await http.post(
       Uri.parse(url),
@@ -85,8 +124,9 @@ class _HttpLoggerExampleState extends State<HttpLoggerExample> {
     // Capture end time
     final endTime = DateTime.now();
 
-    // Log the POST request and response
+    // Log the POST request and response after getting response from api
     HttpLog.sendLog(
+      id: startTime.millisecondsSinceEpoch,
       method: "POST",
       url: url,
       header: headers,
@@ -117,8 +157,14 @@ class _HttpLoggerExampleState extends State<HttpLoggerExample> {
           children: <Widget>[
             ElevatedButton(
               onPressed: _makeGetRequest,
-              child: const Text('Make GET Request'),
+              child: const Text('Make GET Request M:1'),
             ),
+
+            ElevatedButton(
+              onPressed: _makeGetRequest2,
+              child: const Text('Make GET Request M:2'),
+            ),
+
             ElevatedButton(
               onPressed: _makePostRequest,
               child: const Text('Make POST Request'),
