@@ -292,11 +292,14 @@ class HttpLog {
       'response': response0,
     };
 
-    if (_channel != null && !_isRealDevice) {
-      _channel!.sink.add(json.encode(log));
-    } else {
-      id ??= DateTime.now().millisecondsSinceEpoch;
+    id ??= DateTime.now().millisecondsSinceEpoch;
 
+    if (_channel != null && !_isRealDevice) {
+      _channel!.sink.add(json.encode({
+        'type': 'update',
+        'log': {'id': id, ...log},
+      }));
+    } else {
       _syncController.add(
         json.encode({
           'type': 'update',
