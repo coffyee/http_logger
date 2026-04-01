@@ -1,3 +1,7 @@
+## 1.1.2
+
+* Exception Response update.
+
 ## 1.1.1
 
 * Bug fixed.

@@ -231,8 +231,12 @@ class HttpLog {
         url: url,
         header: header,
         request: request,
+        statusCode: 503,
         duration: endTime.difference(startTime).inMilliseconds,
-        response: e.toString(),
+        response: json.encode({
+          "error": "Network error",
+          "message": e.toString(),
+        }),
       );
 
       rethrow;
